@@ -499,6 +499,69 @@ STR_ORDINAL_NUMBER_14TH                                         :14th
 STR_ORDINAL_NUMBER_15TH                                         :15th
 ############ range for ordinal numbers ends
 
+############ range for time starts
+STR_TIME_00                                                     :00
+STR_TIME_01                                                     :01
+STR_TIME_02                                                     :02
+STR_TIME_03                                                     :03
+STR_TIME_04                                                     :04
+STR_TIME_05                                                     :05
+STR_TIME_06                                                     :06
+STR_TIME_07                                                     :07
+STR_TIME_08                                                     :08
+STR_TIME_09                                                     :09
+STR_TIME_10                                                     :10
+STR_TIME_11                                                     :11
+STR_TIME_12                                                     :12
+STR_TIME_13                                                     :13
+STR_TIME_14                                                     :14
+STR_TIME_15                                                     :15
+STR_TIME_16                                                     :16
+STR_TIME_17                                                     :17
+STR_TIME_18                                                     :18
+STR_TIME_19                                                     :19
+STR_TIME_20                                                     :20
+STR_TIME_21                                                     :21
+STR_TIME_22                                                     :22
+STR_TIME_23                                                     :23
+STR_TIME_24                                                     :24
+STR_TIME_25                                                     :25
+STR_TIME_26                                                     :26
+STR_TIME_27                                                     :27
+STR_TIME_28                                                     :28
+STR_TIME_29                                                     :29
+STR_TIME_30                                                     :30
+STR_TIME_31                                                     :31
+STR_TIME_32                                                     :32
+STR_TIME_33                                                     :33
+STR_TIME_34                                                     :34
+STR_TIME_35                                                     :35
+STR_TIME_36                                                     :36
+STR_TIME_37                                                     :37
+STR_TIME_38                                                     :38
+STR_TIME_39                                                     :39
+STR_TIME_40                                                     :40
+STR_TIME_41                                                     :41
+STR_TIME_42                                                     :42
+STR_TIME_43                                                     :43
+STR_TIME_44                                                     :44
+STR_TIME_45                                                     :45
+STR_TIME_46                                                     :46
+STR_TIME_47                                                     :47
+STR_TIME_48                                                     :48
+STR_TIME_49                                                     :49
+STR_TIME_50                                                     :50
+STR_TIME_51                                                     :51
+STR_TIME_52                                                     :52
+STR_TIME_53                                                     :53
+STR_TIME_54                                                     :54
+STR_TIME_55                                                     :55
+STR_TIME_56                                                     :56
+STR_TIME_57                                                     :57
+STR_TIME_58                                                     :58
+STR_TIME_59                                                     :59                                        
+############ range for time ends
+
 ############ range for days starts
 STR_DAY_NUMBER_1ST                                              :1st
 STR_DAY_NUMBER_2ND                                              :2nd
@@ -1702,6 +1765,9 @@ STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS                         :Pathfinder for 
 STR_CONFIG_SETTING_PATHFINDER_FOR_SHIPS_HELPTEXT                :Path finder to use for ships
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS                           :Automatic reversing at signals: {STRING2}
 STR_CONFIG_SETTING_REVERSE_AT_SIGNALS_HELPTEXT                  :Allow trains to reverse on a signal, if they waited there a long time
+
+STR_CONFIG_SETTING_SLOW_TIME_FACTOR                             :{LTBLUE} Slow time factor :{ORANGE}{STRING2}
+STR_CONFIG_SETTING_SLOW_TIME_FACTOR_HELPTEXT                    :Slow down the time in game. Default 1 is normal speed.
 
 STR_CONFIG_SETTING_QUERY_CAPTION                                :{WHITE}Change setting value
 
@@ -3680,7 +3746,9 @@ STR_VEHICLE_INFO_CAPACITY_CAPACITY                              :{BLACK}Capacity
 
 STR_VEHICLE_INFO_FEEDER_CARGO_VALUE                             :{BLACK}Transfer Credits: {LTBLUE}{CURRENCY_LONG}
 
+STR_VEHICLE_DETAILS_SERVICING_INTERVAL_SLOW_DAYS                :{BLACK}Servicing interval: {LTBLUE}{COMMA}{NBSP}cycles{BLACK}   Next service: {LTBLUE}{SLOW_DATE}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_DAYS                     :{BLACK}Servicing interval: {LTBLUE}{COMMA}{NBSP}days{BLACK}   Last service: {LTBLUE}{DATE_LONG}
+STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT_SLOW             :{BLACK}Servicing interval: {LTBLUE}{COMMA}%{BLACK}   Next service: {LTBLUE}{SLOW_DATE}
 STR_VEHICLE_DETAILS_SERVICING_INTERVAL_PERCENT                  :{BLACK}Servicing interval: {LTBLUE}{COMMA}%{BLACK}   Last service: {LTBLUE}{DATE_LONG}
 STR_VEHICLE_DETAILS_INCREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Increase servicing interval by 10. Ctrl+Click increases servicing interval by 5
 STR_VEHICLE_DETAILS_DECREASE_SERVICING_INTERVAL_TOOLTIP         :{BLACK}Decrease servicing interval by 10. Ctrl+Click decreases servicing interval by 5
@@ -4865,6 +4933,7 @@ STR_VEHICLE_NAME_AIRCRAFT_POWERNAUT_HELICOPTER                  :Powernaut Helic
 STR_FORMAT_DATE_TINY                                            :{RAW_STRING}-{RAW_STRING}-{NUM}
 STR_FORMAT_DATE_SHORT                                           :{STRING} {NUM}
 STR_FORMAT_DATE_LONG                                            :{STRING} {STRING} {NUM}
+STR_FORMAT_SLOW_DATE                                            :{STRING} {STRING} {NUM} {STRING}:{STRING}
 STR_FORMAT_DATE_ISO                                             :{2:NUM}-{1:RAW_STRING}-{0:RAW_STRING}
 
 STR_FORMAT_BUOY_NAME                                            :{TOWN} Buoy
@@ -4935,6 +5004,7 @@ STR_JUST_STRING                                                 :{STRING}
 STR_JUST_STRING_STRING                                          :{STRING}{STRING}
 STR_JUST_RAW_STRING                                             :{RAW_STRING}
 STR_JUST_BIG_RAW_STRING                                         :{BIG_FONT}{RAW_STRING}
+STR_JUST_SLOW_DATE                                              :{SLOW_DATE}
 
 # Slightly 'raw' stringcodes with colour or size
 STR_BLACK_COMMA                                                 :{BLACK}{COMMA}
@@ -4947,6 +5017,7 @@ STR_TINY_BLACK_DECIMAL                                          :{TINY_FONT}{BLA
 STR_COMPANY_MONEY                                               :{WHITE}{CURRENCY_LONG}
 STR_BLACK_DATE_LONG                                             :{BLACK}{DATE_LONG}
 STR_WHITE_DATE_LONG                                             :{WHITE}{DATE_LONG}
+STR_WHITE_SLOW_DATE                                             :{WHITE}{SLOW_DATE}
 STR_SHORT_DATE                                                  :{WHITE}{DATE_TINY}
 STR_DATE_LONG_SMALL                                             :{TINY_FONT}{BLACK}{DATE_LONG}
 STR_TINY_GROUP                                                  :{TINY_FONT}{GROUP}
