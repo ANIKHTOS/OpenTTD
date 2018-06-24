@@ -22,25 +22,18 @@
 #include "saveload/saveload.h"
 
 #include "safeguards.h"
-int _leap; ///< 0 or 1 depending if it is leap year
-int _leap4; ///< check if year in multiple of 4
-int _leap100; ///< check if year in multiple of 100
-short int _leap400; ///< check if year in multiple of 400
+
 Year      _cur_year;   ///< Current year, starting at 0
-Month     _cur_month;  ///< Current month (0..11)
- int  hourH;
- int minH;
-uint16 _slowD;       ///< factor of slowing game down , 1 is normal speed
-uint64 _dateS;
-uint16 _dayn;       ///< factor of slowing game down , 1 is normal speed
-Date      _date;       ///< Current date in days (day counter)
-int16 _yearn ;       ///< regular game year
-int _monthn;       ///< regular game month 
-int _monthh;       ///< regular game month  
-int16 _dayh;       ///< counter for game month   
-int _daym ;       ///< days in month 
+Month     _cur_month;  ///< Current normal month (0, 11) 
+Date      _date;       ///< Current date in slow days (day counter)
 DateFract _date_fract; ///< Fractional part of the day.
 uint16 _tick_counter;  ///< Ever incrementing (and sometimes wrapping) tick counter for setting off various events
+uint64 _dateS;         ///< Current date in normal days  
+uint16 _dayn;          ///< counter normal days to Slow Day
+int16 _dayh;           ///< counter normal days to Slow Month   
+int _monthn;           ///< counter normal months to Slow Month  
+int _monthh;           ///< counter slow months to Slow Year 
+int _daym ;            ///< days in normal month 
 
 /**
  * Set the date.
@@ -54,29 +47,20 @@ void SetDate(Date date, DateFract fract)
 	YearMonthDay ymd;
 
 	_date = date;
-	
 	_date_fract = fract;
 	ConvertDateToYMD(date, &ymd);
 	_cur_year = ymd.year;
 	_cur_month = ymd.month;
-    _dayh = ymd.day; /// does this gives the day of  month we are in???
-    _dayh = 1;
-
-
-
+	_dayh = ymd.day; /// intitializes counter 
 }
+/* intitializes and put values to the new variables introduced */
 void SetSlowTime()
 {
-	_leap4 = _cur_year % 4;
-	_leap100 = _cur_year % 100;
-	_leap400 = _cur_year % 400;
-	_yearn = 0;
-	_monthn = 0;
 	_dayn=0;
+	_monthn = 0;
 	_monthh=_cur_month;
-	_dateS = _date*100;
-	_slowD=0;
-	}
+	_dateS = _date*_settings_game.game_creation.slow_time_factor;
+}
 	
 void Set_daym()
  {
@@ -133,10 +117,8 @@ switch (_cur_month) {
 	_daym=31;
 	break;
 }
-
 }
-
-
+	
 #define M(a, b) ((a << 5) | b)
 static const uint16 _month_date_from_year_day[] = {
 	M( 0, 1), M( 0, 2), M( 0, 3), M( 0, 4), M( 0, 5), M( 0, 6), M( 0, 7), M( 0, 8), M( 0, 9), M( 0, 10), M( 0, 11), M( 0, 12), M( 0, 13), M( 0, 14), M( 0, 15), M( 0, 16), M( 0, 17), M( 0, 18), M( 0, 19), M( 0, 20), M( 0, 21), M( 0, 22), M( 0, 23), M( 0, 24), M( 0, 25), M( 0, 26), M( 0, 27), M( 0, 28), M( 0, 29), M( 0, 30), M( 0, 31),
@@ -281,6 +263,7 @@ static const Month _autosave_months[] = {
  */
 static void OnNewYear()
 {
+	CompaniesYearlyLoop();
 	VehiclesYearlyLoop();
 	TownsYearlyLoop();
 	InvalidateWindowClassesData(WC_BUILD_STATION);
@@ -355,14 +338,9 @@ static void OnNewDay()
 
 	/* Refresh after possible snowline change */
 	SetWindowClassesDirty(WC_TOWN_VIEW);
-	
 }
 
-/**
- * Increases the tick counter, increases date  and possibly calls
- * procedures that have to be called daily, monthly or yearly.
- */
-
+/* use theis function if you want something to happen every new slow year but not every normal year */
 static void OnNewYearS()
 {
 	CompaniesYearlyLoop();
@@ -385,15 +363,20 @@ LinkGraph *lg;
 
 }
 
+/* use theis function if you want something to happen every new slow month but not every normal month */
 static void OnNewMonthS()
 {
 }
 
-
+/* use theis function if you want something to happen every new slow day but not every normal day */
 static void OnNewDayS()
 {
 }
 
+/**
+ * Increases the tick counter, increases date  and possibly calls
+ * procedures that have to be called daily, monthly or yearly.
+ */
 void IncreaseDate()
 {
 	/* increase day, and check if a new day is there? */
@@ -405,45 +388,46 @@ void IncreaseDate()
 	if (_date_fract < DAY_TICKS) return;
 	_date_fract = 0;
 
-	/* increase day counter */
+	/* increase daily counters */
 	_dayn++;
 	_dayh++;
 	Set_daym();
 	_dateS=_date*_settings_game.game_creation.slow_time_factor +_dayn;
 	OnNewDay();
 	
+	/* check if we enter new slow day, if we did it will run the functions connected to that */
 	if ( _settings_game.game_creation.slow_time_factor - _dayn == 0){
-		_dayn  = 0;
-		_date++;
-		_dateS=_date*_settings_game.game_creation.slow_time_factor +_dayn;
+		_dayn  = 0;  // reset counter
+		_date++;     // increase slow date counter
+		_dateS=_date*_settings_game.game_creation.slow_time_factor +_dayn; // adjust normal days counter
 		OnNewDayS();
 		}
+	/* check if we enter new normal month, if we did it will run the functions connected to that */		
 	if (_dayh - _daym == 0)
 		{
-		_dayh = 1;
-		_monthn ++;
-		_cur_month++;
-		
+		_dayh = 1;     // reset counter
+		_monthn ++;    // increase counter
+		_cur_month++;  // increase counter
 		OnNewMonth();
 		}
+    /* check if we enter new slow month, if we did it will run the functions connected to that */			
 	if (_monthn - _settings_game.game_creation.slow_time_factor == 0)
 		{
-		_monthn=0;
-		_monthh ++;
+		_monthn=0;     // reset counter
+		_monthh ++;    // increase counter
 		OnNewMonthS();
 		}
+    /* check if we enter new normal year, if we did it will run the functions connected to that */			
 	if (_cur_month - 12 == 0)
 		{
-		_cur_month =0;
+		_cur_month =0;   // reset counter
 		OnNewYear();
-		_yearn++;
 		}
+	/* check if we enter new slow year, if we did it will run the functions connected to that */	
 	if (_monthh - 12 == 0)
 		{
-		_monthh=0;			
-		_yearn=0;
-		_cur_year++;
+		_monthh=0;	    // reset counter
+		_cur_year++;    // increase slow year
 		OnNewYearS();
 		}
 }
-
