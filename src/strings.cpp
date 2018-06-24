@@ -401,6 +401,18 @@ static char *FormatBytes(char *buff, int64 number, const char *last)
 
 	return buff;
 }
+static char *FormatSlowDate(char *buff, Date _dateS, const char *last, uint case_index)
+{
+	int32 _dateG= (_dateS-_dateS%_settings_game.game_creation.slow_time_factor)/_settings_game.game_creation.slow_time_factor;
+	int16 _timer= _dateS%_settings_game.game_creation.slow_time_factor;
+	YearMonthDay ymd;
+	ConvertDateToYMD(_dateG, &ymd);
+	int hourH=(_timer*1440/_settings_game.game_creation.slow_time_factor-(_timer*1440/_settings_game.game_creation.slow_time_factor)%60)/60;
+    int minH=(_timer*1440/_settings_game.game_creation.slow_time_factor)%60;
+	int64 args[] = {ymd.day + STR_DAY_NUMBER_1ST - 1, STR_MONTH_ABBREV_JAN + ymd.month, ymd.year,STR_TIME_00 +hourH, STR_TIME_00 + minH};
+	StringParameters tmp_params(args);
+	return FormatString(buff, GetStringPtr(STR_FORMAT_SLOW_DATE), &tmp_params, last, case_index);
+}
 
 static char *FormatYmdString(char *buff, Date date, const char *last, uint case_index)
 {
@@ -411,7 +423,6 @@ static char *FormatYmdString(char *buff, Date date, const char *last, uint case_
 	StringParameters tmp_params(args);
 	return FormatString(buff, GetStringPtr(STR_FORMAT_DATE_LONG), &tmp_params, last, case_index);
 }
-
 static char *FormatMonthAndYear(char *buff, Date date, const char *last, uint case_index)
 {
 	YearMonthDay ymd;
@@ -1197,6 +1208,11 @@ static char *FormatString(char *buff, const char *str_arg, StringParameters *arg
 				buff = FormatYmdString(buff, args->GetInt32(SCC_DATE_LONG), last, next_substr_case_index);
 				next_substr_case_index = 0;
 				break;
+				
+			case SCC_SLOW_DATE: // {SLOW_DATE}
+				buff = FormatSlowDate(buff, args->GetInt32(SCC_SLOW_DATE), last, next_substr_case_index);
+				next_substr_case_index = 0;
+				break;	
 
 			case SCC_DATE_ISO: // {DATE_ISO}
 				buff = FormatTinyOrISODate(buff, args->GetInt32(), STR_FORMAT_DATE_ISO, last);

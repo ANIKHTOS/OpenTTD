@@ -22,10 +22,23 @@
 #include "saveload/saveload.h"
 
 #include "safeguards.h"
-
+int _leap; ///< 0 or 1 depending if it is leap year
+int _leap4; ///< check if year in multiple of 4
+int _leap100; ///< check if year in multiple of 100
+short int _leap400; ///< check if year in multiple of 400
 Year      _cur_year;   ///< Current year, starting at 0
 Month     _cur_month;  ///< Current month (0..11)
+ int  hourH;
+ int minH;
+uint16 _slowD;       ///< factor of slowing game down , 1 is normal speed
+uint64 _dateS;
+uint16 _dayn;       ///< factor of slowing game down , 1 is normal speed
 Date      _date;       ///< Current date in days (day counter)
+int16 _yearn ;       ///< regular game year
+int _monthn;       ///< regular game month 
+int _monthh;       ///< regular game month  
+int16 _dayh;       ///< counter for game month   
+int _daym ;       ///< days in month 
 DateFract _date_fract; ///< Fractional part of the day.
 uint16 _tick_counter;  ///< Ever incrementing (and sometimes wrapping) tick counter for setting off various events
 
@@ -41,11 +54,88 @@ void SetDate(Date date, DateFract fract)
 	YearMonthDay ymd;
 
 	_date = date;
+	
 	_date_fract = fract;
 	ConvertDateToYMD(date, &ymd);
 	_cur_year = ymd.year;
 	_cur_month = ymd.month;
+    _dayh = ymd.day; /// does this gives the day of  month we are in???
+    _dayh = 1;
+
+
+
 }
+void SetSlowTime()
+{
+	_leap4 = _cur_year % 4;
+	_leap100 = _cur_year % 100;
+	_leap400 = _cur_year % 400;
+	_yearn = 0;
+	_monthn = 0;
+	_dayn=0;
+	_monthh=_cur_month;
+	_dateS = _date*100;
+	_slowD=0;
+	}
+	
+void Set_daym()
+ {
+switch (_cur_month) {
+	case 0:
+	_daym= 31;
+	break;
+	
+	case 1:
+	if (( _cur_year % 4==0 && _cur_year % 100 ==0) || _cur_year % 400 ==0){
+	_daym= 29;
+	}else {
+	_daym= 28;	
+	}
+	break;
+	
+	case 2:
+	_daym= 31;
+	break;
+	
+	case 3:
+	_daym=30;
+	break;
+	
+	case 4:
+	_daym=31;
+	break;
+	
+	case 5:
+	_daym=30;
+	break;
+	
+	case 6:
+	_daym=31;
+	break;
+	
+	case 7:
+	_daym=31;
+	break;
+	
+	case 8:
+	_daym=30;
+	break;
+	
+	case 9:
+	_daym= 31;
+	break;
+	
+	case 10:
+	_daym=30;
+	break; 
+	
+	case 11:
+	_daym=31;
+	break;
+}
+
+}
+
 
 #define M(a, b) ((a << 5) | b)
 static const uint16 _month_date_from_year_day[] = {
@@ -191,7 +281,6 @@ static const Month _autosave_months[] = {
  */
 static void OnNewYear()
 {
-	CompaniesYearlyLoop();
 	VehiclesYearlyLoop();
 	TownsYearlyLoop();
 	InvalidateWindowClassesData(WC_BUILD_STATION);
@@ -266,12 +355,45 @@ static void OnNewDay()
 
 	/* Refresh after possible snowline change */
 	SetWindowClassesDirty(WC_TOWN_VIEW);
+	
 }
 
 /**
  * Increases the tick counter, increases date  and possibly calls
  * procedures that have to be called daily, monthly or yearly.
  */
+
+static void OnNewYearS()
+{
+	CompaniesYearlyLoop();
+	if (_cur_year == ORIGINAL_END_YEAR) {
+		ShowEndGameChart();
+	/* check if we reached the maximum year, decrement dates by a year */
+	} else if (_cur_year == MAX_YEAR + 1) {
+		Vehicle *v;
+		int days_this_year;
+
+		_cur_year--;
+		days_this_year = IsLeapYear(_cur_year) ? DAYS_IN_LEAP_YEAR : DAYS_IN_YEAR;
+		_date -= days_this_year;
+		FOR_ALL_VEHICLES(v) v->date_of_last_service -= days_this_year;
+
+
+LinkGraph *lg;
+		FOR_ALL_LINK_GRAPHS(lg) lg->ShiftDates(-days_this_year);
+	}	
+
+}
+
+static void OnNewMonthS()
+{
+}
+
+
+static void OnNewDayS()
+{
+}
+
 void IncreaseDate()
 {
 	/* increase day, and check if a new day is there? */
@@ -284,27 +406,44 @@ void IncreaseDate()
 	_date_fract = 0;
 
 	/* increase day counter */
-	_date++;
-
-	YearMonthDay ymd;
-	ConvertDateToYMD(_date, &ymd);
-
-	/* check if we entered a new month? */
-	bool new_month = ymd.month != _cur_month;
-
-	/* check if we entered a new year? */
-	bool new_year = ymd.year != _cur_year;
-
-	/* update internal variables before calling the daily/monthly/yearly loops */
-	_cur_month = ymd.month;
-	_cur_year  = ymd.year;
-
-	/* yes, call various daily loops */
+	_dayn++;
+	_dayh++;
+	Set_daym();
+	_dateS=_date*_settings_game.game_creation.slow_time_factor +_dayn;
 	OnNewDay();
-
-	/* yes, call various monthly loops */
-	if (new_month) OnNewMonth();
-
-	/* yes, call various yearly loops */
-	if (new_year) OnNewYear();
+	
+	if ( _settings_game.game_creation.slow_time_factor - _dayn == 0){
+		_dayn  = 0;
+		_date++;
+		_dateS=_date*_settings_game.game_creation.slow_time_factor +_dayn;
+		OnNewDayS();
+		}
+	if (_dayh - _daym == 0)
+		{
+		_dayh = 1;
+		_monthn ++;
+		_cur_month++;
+		
+		OnNewMonth();
+		}
+	if (_monthn - _settings_game.game_creation.slow_time_factor == 0)
+		{
+		_monthn=0;
+		_monthh ++;
+		OnNewMonthS();
+		}
+	if (_cur_month - 12 == 0)
+		{
+		_cur_month =0;
+		OnNewYear();
+		_yearn++;
+		}
+	if (_monthh - 12 == 0)
+		{
+		_monthh=0;			
+		_yearn=0;
+		_cur_year++;
+		OnNewYearS();
+		}
 }
+

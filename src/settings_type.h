@@ -69,6 +69,7 @@ struct DifficultySettings {
 	bool   line_reverse_mode;                ///< reversing at stations or not
 	bool   disasters;                        ///< are disasters enabled
 	byte   town_council_tolerance;           ///< minimum required town ratings to be allowed to demolish stuff
+	
 };
 
 /** Settings related to the GUI and other stuff that is not saved in the savegame. */
@@ -293,7 +294,11 @@ struct GameCreationSettings {
 	byte   min_river_length;                 ///< the minimum river length
 	byte   river_route_random;               ///< the amount of randomicity for the route finding
 	byte   amount_of_rivers;                 ///< the amount of rivers
+    uint16  slow_time_factor;				 ///< How fast the time passes. Higher values the slower it pass. Default 1 normal speed
+	
 };
+
+
 
 /** Settings related to construction in-game */
 struct ConstructionSettings {
@@ -586,5 +591,4 @@ static inline GameSettings &GetGameSettings()
 {
 	return (_game_mode == GM_MENU) ? _settings_newgame : _settings_game;
 }
-
 #endif /* SETTINGS_TYPE_H */

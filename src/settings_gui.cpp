@@ -1720,10 +1720,12 @@ static SettingsContainer &GetSettingsTree()
 				cdist->Add(new SettingEntry("linkgraph.demand_distance"));
 				cdist->Add(new SettingEntry("linkgraph.demand_size"));
 				cdist->Add(new SettingEntry("linkgraph.short_path_saturation"));
+				
 			}
-
+			environment->Add(new SettingEntry("game_creation.slow_time_factor"));
 			environment->Add(new SettingEntry("station.modified_catchment"));
 			environment->Add(new SettingEntry("construction.extra_tree_placement"));
+
 		}
 
 		SettingsPage *ai = main->Add(new SettingsPage(STR_CONFIG_SETTING_AI));
